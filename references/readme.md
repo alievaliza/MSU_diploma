@@ -1,1 +1,1 @@
-1. 
+1. Predicting Job Salaries from Text Descriptions (doi.org/10.14288/1.0075767)
