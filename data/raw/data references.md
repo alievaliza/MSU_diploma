@@ -1,0 +1,1 @@
+1. https://drive.google.com/drive/folders/16sSoyqlPgxT6ViTrNephKvE8VRE-hz8F?usp=sharing - Adzuna data from Kaggle (https://www.kaggle.com/c/job-salary-prediction)
