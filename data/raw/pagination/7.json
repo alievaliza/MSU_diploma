@@ -1,1 +1,0 @@
-{"description": "you can't look up more than 2000 items in the list", "bad_argument": "page, per_page", "bad_arguments": [{"name": "page, per_page", "description": "you can't look up more than 2000 items in the list"}], "errors": [{"value": "page", "type": "bad_argument"}, {"value": "per_page", "type": "bad_argument"}], "request_id": "1631295879409df843c63646da5d3405"}
