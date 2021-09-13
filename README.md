@@ -1,7 +1,7 @@
 Diploma
 ==============================
 
-predicting wages by job description
+predicting salary by job description
 
 Project Organization
 ------------
