@@ -14,6 +14,7 @@ import pandas as pd
 import json
 import os
 import shutil
+import gdown
 
 # PART 0 'Areas'
 
@@ -127,7 +128,14 @@ for fl in os.listdir('./pagination'):
 
 print('Вакансии собраны')
 
-# PART 3
+# PART 3 (released in Colab)
+
+# Загрузка файла 'vacancies.zip' с гугл-драйва и его распаковка
+url = '1vGZg5w7mFYwxRzE96xZuxn_Lv_uq_soy'
+output = "vacancies.zip"
+gdown.download('https://drive.google.com/uc?export=download&id=' + url, output, quiet=False)
+zf = zipfile.ZipFile("vacancies.zip")
+zf.extractall()
 
 # В выводе будем отображать прогресс
 # Для этого узнаем общее количество файлов, которые надо обработать
@@ -154,7 +162,7 @@ for fl in os.listdir('./vacancies'):
 
 # Создадим соединение с БД
 #"postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName"
-#eng = sql.create_engine('postgresql://liolive@parseddatafromhhru:Li_Olive0715@parseddatafromhhru.database.windows.net:1433/hh.ru')
+#eng = sql.create_engine('postgresql://liolive@parseddatafromhhru:password@parseddatafromhhru.database.windows.net:1433/hh.ru')
 #conn = eng.connect()
 
 #df.to_sql('vacancies', conn, schema='public', if_exists='append', index=False)
