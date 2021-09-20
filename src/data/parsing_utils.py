@@ -103,8 +103,7 @@ def makeDataframe():
     # В выводе будем отображать прогресс
     # Для этого узнаем общее количество файлов, которые надо обработать
     # Счетчик обработанных файлов установим в ноль
-    cnt_docs = len(os.listdir('./vacancies'))
-    i, vac = 0, []
+    vac = []
     # Проходимся по всем файлам в папке vacancies
     for fl in tqdm(os.listdir('./vacancies')):
         # Открываем, читаем и закрываем файл
@@ -118,8 +117,6 @@ def makeDataframe():
         except:
             print(f'Ошибка в файле {fl}')
         # Увеличиваем счетчик обработанных файлов на 1, очищаем вывод ячейки и выводим прогресс
-        i += 1
         display.clear_output(wait=True)
-        # display.display('Готово {} из {}'.format(i, cnt_docs))
     # Возвращаем пандосовский датафрейм, который затем сохраняем в файл в таблицу vacancies
     return pd.DataFrame(vac)
