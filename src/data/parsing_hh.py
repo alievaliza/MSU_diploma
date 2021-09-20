@@ -15,13 +15,6 @@ from os.path import join as pjoin
 import shutil
 import gdown
 
-print('Введите path_dst:')
-path_dst = input()
-path_dst = path_dst if path_dst != '' else 'C:/Users/Lisa/diploma/src/data/pagination_done/'
-print('Введите path_src:')
-path_src = input()
-path_src = path_src if path_src != '' else 'C:/Users/Lisa/diploma/src/data/pagination/'
-
 # PART 0 Получаем id регионов
 try:
     f = open('areas.txt', encoding='utf8')
@@ -46,7 +39,7 @@ except:
 getAllPages(df_areas)
 
 # PART 2
-getAllvacancies(path_src, path_dst)
+getAllvacancies()
 print('Вакансии собраны')
 
 # PART 3 (released in Colab)

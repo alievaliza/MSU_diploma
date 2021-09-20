@@ -49,17 +49,21 @@ def getAllPages(df_areas):
                         os.remove(nextFileName)
                         print('Лимит исчерпан. Можете сменить IP или подождать 80 минут.')
                         time.sleep(4800)
+                except:
+                    pass
             except:
                 pass
         print('Страницы поиска собраны', area)
 
-def getAllVacancies(path_src, path_dst):
+def getAllVacancies():
     """
     Создаем метод для разбора страниц с вакансиями по отдельным вакансиям.
     Аргументы:
         path_src - путь папки, где лежат страницы с вакансиями
         path_dst - путь пустой папки, куда будут перемещаться разобранные страницы с вакансиями
     """
+    if not os.path.exists('./pagination_done'):
+        os.mkdir('./pagination')
     start_time = time.time()
     stop = 0
     for fl in os.listdir('./pagination'):
@@ -99,7 +103,7 @@ def getAllVacancies(path_src, path_dst):
                     time.sleep(4800)
             except:
                 try:
-                    shutil.move(path_src + fl, path_dst + fl)
+                    shutil.move(f'./pagination/{fl}', f'./pagination_done/{fl}')
                 except:
                     print(f'Не удалось переместить {fl}')
 
