@@ -16,60 +16,55 @@ def getPage(page, area):
     req.close()
     return data
 
-def getAllPages(df_areas):
+def getAllPages(df_areas, wait, from_area = 0):
     """
     Создаем метод для получения 20 * len(df_areas) страниц с вакансиями.
-    Аргумент:
+    Аргументы:
         df_areas - датафрейм с id регионов
+        wait - время ожидания следующего запроса после исчерпания лимита
+        from_area - индекс региона, с которого начинается запрос
     """
     areas = len(df_areas)
-    for i in range(areas):
+    if not os.path.exists('./pagination'):
+        os.mkdir('./pagination')
+    for i in tqdm(range(from_area, areas)):
         area = df_areas['id'][i]
-        print(area)
         # Считываем первые 2000 вакансий
         for page in range(20):
             # Преобразуем текст ответа запроса в справочник Python
             try:
                 jsObj = json.loads(getPage(page, area))
-                # Сохраняем файлы в папку {путь до текущего документа со скриптом}\docs\pagination
-                # Определяем количество файлов в папке для сохранения документа с ответом запроса
-                # Полученное значение используем для формирования имени документа
-                if not os.path.exists('./pagination'):
-                    os.mkdir('./pagination')
-                nextFileName = './pagination/{}.json'.format(len(os.listdir('./pagination')))
-                # Создаем новый документ, записываем в него ответ запроса, после закрываем
-                f = open(nextFileName, mode='w', encoding='utf8')
-                f.write(json.dumps(jsObj, ensure_ascii=False))
-                f.close()
-                # Проверка на последнюю страницу, если вакансий меньше 2000
-                if (jsObj['pages'] - page) <= 1:
-                   break
-                try:
-                    if jsObj['request_id']:
-                        os.remove(nextFileName)
-                        print('Лимит исчерпан. Можете сменить IP или подождать 80 минут.')
-                        time.sleep(4800)
-                except:
-                    pass
+            except:
+                print(f'\nЛимит исчерпан. Можете сменить IP и перезапустить getAllPages с from_area = {i} или подождать {int(wait/60)} минут.', e)
+                time.sleep(wait)
+            try:
+                if jsObj['request_id']:
+                    print(f'\nЛимит исчерпан. Можете сменить IP и перезапустить getAllPages с from_area = {i} или подождать {int(wait / 60)} минут.')
+                    time.sleep(wait)
             except:
                 pass
-        print('Страницы поиска собраны', area)
+            # Проверка на количество вакансий в регионе = 0 или на количество страниц
+            if jsObj['found'] == 0 or page + 1 > jsObj['pages']:
+                break
+            # Сохраняем файлы в папку {путь до текущего документа со скриптом}\pagination
+            nextFileName = f'./pagination/{df_areas["id"][i]}_{page}.json'
+            # Создаем новый документ, записываем в него ответ запроса, после закрываем
+            f = open(nextFileName, mode='w', encoding='utf8')
+            f.write(json.dumps(jsObj, ensure_ascii=False))
+            f.close()
 
-def getAllVacancies():
+def getAllVacancies(wait):
     """
     Создаем метод для разбора страниц с вакансиями по отдельным вакансиям.
-    Аргументы:
-        path_src - путь папки, где лежат страницы с вакансиями
-        path_dst - путь пустой папки, куда будут перемещаться разобранные страницы с вакансиями
+    Аргумент:
+       wait - время ожидания следующего запроса после исчерпания лимита
     """
     if not os.path.exists('./pagination_done'):
-        os.mkdir('./pagination')
+        os.mkdir('./pagination_done')
+    if not os.path.exists('./vacancies'):
+        os.mkdir('./vacancies')
     start_time = time.time()
-    stop = 0
-    for fl in os.listdir('./pagination'):
-        if stop:
-            break
-        print(fl)
+    for fl in tqdm(os.listdir('./pagination')):
         # Открываем файл, читаем его содержимое, закрываем файл
         f = open('./pagination/{}'.format(fl), encoding='utf8')
         jsonText = f.read()
@@ -84,8 +79,6 @@ def getAllVacancies():
             req.close()
             # Создаем файл в формате json с идентификатором вакансии в качестве названия
             # Записываем в него ответ запроса и закрываем файл
-            if not os.path.exists('./vacancies'):
-                os.mkdir('./vacancies')
             fileName = f'./vacancies/{v["id"]}.json'
             f = open(fileName, mode='w', encoding='utf8')
             f.write(data)
@@ -96,16 +89,15 @@ def getAllVacancies():
             jsonObj = json.loads(jsonText)
             try:
                 if jsonObj['request_id']:
-                    print('Лимит исчерпан. Можете сменить IP или подождать 80 минут.')
-                    print("Итерация длилась %s мин" % ((time.time() - start_time) / 60))
-                    stop = 1
+                    print(f'\nЛимит исчерпан. Можете сменить IP и перезапустить getAllVacancies или подождать {int(wait/60)} минут.')
+                    print("Итерация длилась %s мин" % (int((time.time() - start_time) / 60)))
                     os.remove(fileName)
-                    time.sleep(4800)
+                    time.sleep(wait)
             except:
                 try:
                     shutil.move(f'./pagination/{fl}', f'./pagination_done/{fl}')
                 except:
-                    print(f'Не удалось переместить {fl}')
+                    pass
 
 def makeDataframe():
     # В выводе будем отображать прогресс
@@ -114,7 +106,7 @@ def makeDataframe():
     cnt_docs = len(os.listdir('./vacancies'))
     i, vac = 0, []
     # Проходимся по всем файлам в папке vacancies
-    for fl in os.listdir('./vacancies'):
+    for fl in tqdm(os.listdir('./vacancies')):
         # Открываем, читаем и закрываем файл
         f = open('./vacancies/{}'.format(fl), encoding='utf8')
         jsonText = f.read()
@@ -124,13 +116,10 @@ def makeDataframe():
             jsonObj = json.loads(jsonText)
             vac.append(jsonObj)
         except:
-            print('Ошибка')
+            print(f'Ошибка в файле {fl}')
         # Увеличиваем счетчик обработанных файлов на 1, очищаем вывод ячейки и выводим прогресс
         i += 1
         display.clear_output(wait=True)
-        display.display('Готово {} из {}'.format(i, cnt_docs))
-    # Возврвщаем пандосовский датафрейм, который затем сохраняем в файл в таблицу vacancies
+        # display.display('Готово {} из {}'.format(i, cnt_docs))
+    # Возвращаем пандосовский датафрейм, который затем сохраняем в файл в таблицу vacancies
     return pd.DataFrame(vac)
-
-
-
