@@ -1,34 +1,11 @@
-# Библиотека для работы с HTTP-запросами. Будем использовать ее для обращения к API HH
-import requests
-# Пакет для удобной работы с данными в формате json
-import json
-# Модуль для работы со значением времени
-import time
-# Модуль для работы с операционной системой. Будем использовать для работы с файлами
-import os
-# Модуль для работы с отображением вывода Jupyter
-from IPython import display
-import pandas as pd
-import json
-import os
-from os.path import join as pjoin
-import shutil
-import gdown
-from tqdm import tqdm
-
 # PART 0 Получаем id регионов
-try:
-    f = open('areas.txt', encoding='utf8')
-    jsonText = f.read()
-    f.close()
-except:
-    print('Загрузите файл "areas.txt"')
-    quit()
+req = requests.get('https://api.hh.ru/areas')  # Посылаем запрос к API
+data = req.content.decode()  # Декодируем его ответ, чтобы Кириллица отображалась корректно
+req.close()
 # Преобразуем полученный текст в объект справочника
-jsonObj = json.loads(jsonText)
+jsonObj = json.loads(data)
 areas_id, countries_name = [], []
-countries = 9
-for i in range(countries):
+for i in range(len(jsonObj)):
     for area in jsonObj[i]['areas']:
         areas_id.append(area)
         countries_name.append(jsonObj[i]['name'])
@@ -39,8 +16,8 @@ df_areas['country_name'] = countries_name
 
 
 # PART 1
-# Зададим время ожидания, равное 80 минутам, установленное эмпирически
-wait = 4800
+# Зададим время ожидания, равное 70 минутам, установленное эмпирически
+wait = 4200
 print("Введите from_area от 0 до 647 включительно (0 если сборка первая, 647 если сборка не нужна):")
 try:
     from_area = int(input())

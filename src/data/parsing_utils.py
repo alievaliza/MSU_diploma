@@ -1,3 +1,4 @@
+
 def getPage(page, area):
     """
     Создаем метод для получения страницы со списком вакансий.
@@ -70,11 +71,20 @@ def getAllVacancies(wait):
         jsonText = f.read()
         f.close()
         # Преобразуем полученный текст в объект справочника
-        jsonObj = json.loads(jsonText)
+        try:
+            jsonObj = json.loads(jsonText)
+        except:
+            print(f'\nОшибка в файле {fl}')
         # Получаем и проходимся по непосредственно списку вакансий
         for v in jsonObj['items']:
             # Обращаемся к API и получаем детальную информацию по конкретной вакансии
-            req = requests.get(v['url'])
+            try:
+                req = requests.get(v['url'])
+            except:
+                print(f'\nЛимит исчерпан. Можете сменить IP и перезапустить getAllVacancies или подождать {int(wait / 60)} минут.')
+                print("Итерация длилась %s мин" % (int((time.time() - start_time) / 60)))
+                time.sleep(wait)
+                start_time = time.time()
             data = req.content.decode()
             req.close()
             # Создаем файл в формате json с идентификатором вакансии в качестве названия
@@ -86,13 +96,17 @@ def getAllVacancies(wait):
             f = open(fileName, mode='r', encoding='utf8')
             jsonText = f.read()
             f.close()
-            jsonObj = json.loads(jsonText)
+            try:
+                jsonObj = json.loads(jsonText)
+            except:
+                print(f'\nОшибка в файле {fileName}')
             try:
                 if jsonObj['request_id']:
                     print(f'\nЛимит исчерпан. Можете сменить IP и перезапустить getAllVacancies или подождать {int(wait/60)} минут.')
                     print("Итерация длилась %s мин" % (int((time.time() - start_time) / 60)))
                     os.remove(fileName)
                     time.sleep(wait)
+                    start_time = time.time()
             except:
                 try:
                     shutil.move(f'./pagination/{fl}', f'./pagination_done/{fl}')
@@ -115,8 +129,7 @@ def makeDataframe():
             jsonObj = json.loads(jsonText)
             vac.append(jsonObj)
         except:
-            print(f'Ошибка в файле {fl}')
-        # Увеличиваем счетчик обработанных файлов на 1, очищаем вывод ячейки и выводим прогресс
+            print(f'\nОшибка в файле {fl}')
         display.clear_output(wait=True)
-    # Возвращаем пандосовский датафрейм, который затем сохраняем в файл в таблицу vacancies
+    # Возврвщаем пандосовский датафрейм, который затем сохраняем в файл в таблицу vacancies
     return pd.DataFrame(vac)
