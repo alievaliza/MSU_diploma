@@ -13,12 +13,10 @@ df_areas = pd.DataFrame(areas_id)
 df_areas['country_name'] = countries_name
 # df_areas.to_excel('areas.xlsx', index=False)
 
-
-
 # PART 1
 # Зададим время ожидания, равное 70 минутам, установленное эмпирически
 wait = 4200
-print("Введите from_area от 0 до 647 включительно (0 если сборка первая, 647 если сборка не нужна):")
+print(f"Введите from_area от 0 до {len(df_areas)} включительно (0 если сборка первая, {len(df_areas)} если сборка не нужна):")
 try:
     from_area = int(input())
 except:
