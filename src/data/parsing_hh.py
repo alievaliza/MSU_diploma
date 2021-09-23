@@ -1,3 +1,21 @@
+# Библиотека для работы с HTTP-запросами. Будем использовать ее для обращения к API HH
+import requests
+# Пакет для удобной работы с данными в формате json
+import json
+# Модуль для работы со значением времени
+import time
+# Модуль для работы с операционной системой. Будем использовать для работы с файлами
+import os
+# Модуль для работы с отображением вывода Jupyter
+from IPython import display
+import pandas as pd
+import json
+import os
+from os.path import join as pjoin
+import shutil
+import gdown
+from tqdm import tqdm
+
 # PART 0 Получаем id регионов
 req = requests.get('https://api.hh.ru/areas')  # Посылаем запрос к API
 data = req.content.decode()  # Декодируем его ответ, чтобы Кириллица отображалась корректно
