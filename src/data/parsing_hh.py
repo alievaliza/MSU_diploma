@@ -15,6 +15,15 @@ from os.path import join as pjoin
 import shutil
 import gdown
 from tqdm import tqdm
+import argparse
+
+parser = argparse.ArgumentParser(description='Parsing vacancies from api.hh.ru')
+parser.add_argument(
+    '--from_area',
+    type=int,
+    default=0,
+    help='input from_area (default: 0)'
+)
 
 # PART 0 Получаем id регионов
 req = requests.get('https://api.hh.ru/areas')  # Посылаем запрос к API
@@ -29,16 +38,11 @@ for i in range(len(jsonObj)):
         countries_name.append(jsonObj[i]['name'])
 df_areas = pd.DataFrame(areas_id)
 df_areas['country_name'] = countries_name
-# df_areas.to_excel('areas.xlsx', index=False)
 
 # PART 1
 # Зададим время ожидания, равное 70 минутам, установленное эмпирически
 wait = 4200
-print(f"Введите from_area от 0 до {len(df_areas)} включительно (0 если сборка первая, {len(df_areas)} если сборка не нужна):")
-try:
-    from_area = int(input())
-except:
-    from_area = 0
+from_area = parser.parse_args().from_area
 getAllPages(df_areas, wait, from_area)
 print('\nСтраницы поиска собраны')
 
