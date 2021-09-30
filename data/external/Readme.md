@@ -1,0 +1,1 @@
+1. https://docs.google.com/spreadsheets/d/1mfzAkO00BX506VF-_yk_05r5iO72j6Y3/edit?usp=sharing&ouid=110932474671262897876&rtpof=true&sd=true - данные с Росстата з/п за июнь 2021 года по регионам РФ
