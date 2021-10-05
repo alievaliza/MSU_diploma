@@ -1,2 +1,2 @@
 1. Predicting Job Salaries from Text Descriptions (doi.org/10.14288/1.0075767)
-2. Individual Income Tax Rates Table (https://home.kpmg/xx/en/home/services/tax/tax-tools-and-resources/tax-rates-online/individual-income-tax-rates-table.html)
+2. Individual Income Tax Rates (https://taxsummaries.pwc.com/)
