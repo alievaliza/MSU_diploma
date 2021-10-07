@@ -1,3 +1,16 @@
+# Модуль для работы со значением времени
+import time
+# Модуль для работы с операционной системой. Будем использовать для работы с файлами
+import os
+import shutil
+from tqdm import tqdm
+import pandas as pd
+# Библиотека для работы с HTTP-запросами. Будем использовать ее для обращения к API HH
+import requests
+# Пакет для удобной работы с данными в формате json
+import json
+# Модуль для работы с отображением вывода Jupyter
+from IPython import display
 
 def getPage(page, area):
     """
