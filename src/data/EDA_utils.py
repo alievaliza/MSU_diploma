@@ -3,6 +3,7 @@ from typing import Dict
 import pandas as pd
 import numpy as np
 from IPython.display import display
+import seaborn as sns
 
 def fill_prof_area(prof_areas: Dict, row: str):
   """
@@ -35,9 +36,10 @@ def plot_dict(d: Dict):
   Аргумент:
   d - словарь, который нужно изобразить на гистограмме
   """
-  pyplot.bar(d.keys(), d.values(), color='g')
+  keys = list(d.keys())
+  vals = [(d[k]) for k in keys]
+  sns.barplot(x=keys, y=vals, color='green')
   pyplot.xticks(rotation=45, ha="right");
-  pyplot.show()
 
 def plot_salary(df: pd.DataFrame, col: str, Q: float, currency: bool):
   """
@@ -53,13 +55,14 @@ def plot_salary(df: pd.DataFrame, col: str, Q: float, currency: bool):
     Q_to = np.nanpercentile(df['salary_to'][df[col] == el], Q)
     Q_avg = np.nanpercentile(df['salary_avg'][df[col] == el], Q)
     if currency:
-      pyplot.hist(df['salary_avg'][df['salary_avg'] < Q_avg][df[col] == el][df['salary_currency'] == 'RUR']/1000, bins = 15, alpha=0.5, label='avg')
-      pyplot.hist(df['salary_from'][df['salary_from'] < Q_from][df[col] == el][df['salary_currency'] == 'RUR']/1000, bins = 15, alpha=0.5, label='from')
-      pyplot.hist(df['salary_to'][df['salary_to'] < Q_to][df[col] == el][df['salary_currency'] == 'RUR']/1000,bins = 15, alpha=0.5, label='to')
+      sns.kdeplot(df['salary_avg'][df['salary_avg'] < Q_avg][df[col] == el][df['salary_currency'] == 'RUR']/1000, color = 'green', label='среднне')
+      sns.kdeplot(df['salary_from'][df['salary_from'] < Q_from][df[col] == el][df['salary_currency'] == 'RUR']/1000, color = 'blue', label='от')
+      sns.kdeplot(df['salary_to'][df['salary_to'] < Q_to][df[col] == el][df['salary_currency'] == 'RUR']/1000, color = 'orange', label='до')
+      pyplot.xlim(0, 200)
     else:
-      pyplot.hist(df['salary_avg'][df['salary_avg'] < Q_avg][df[col] == el]/1000, bins = 15, alpha=0.5, label='avg')
-      pyplot.hist(df['salary_from'][df['salary_from'] < Q_from][df[col] == el]/1000, bins = 15, alpha=0.5, label='from')
-      pyplot.hist(df['salary_to'][df['salary_to'] < Q_to][df[col] == el]/1000,bins = 15, alpha=0.5, label='to')
+      sns.kdeplot(df['salary_avg'][df['salary_avg'] < Q_avg][df[col] == el]/1000, color = 'green', label='среднне')
+      sns.kdeplot(df['salary_from'][df['salary_from'] < Q_from][df[col] == el]/1000, color = 'blue', label='от')
+      sns.kdeplot(df['salary_to'][df['salary_to'] < Q_to][df[col] == el]/1000, color = 'orange', label='до')
     pyplot.legend(loc='upper right')
     pyplot.title(el)
     pyplot.xlabel("З/п, тыс.")
