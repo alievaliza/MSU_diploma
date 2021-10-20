@@ -52,6 +52,24 @@ def find_best_prof_area(prof_areas: Dict, row:  list, type: str) -> str:
     res = row[0]
   return res
 
+def mostcommon_specialization(prof_area: str, row: list, sp: pd.DataFrame) -> str:
+    """
+    Создаём метод, который сопоставляет вакансии специализацию
+    Аргументы:
+    prof_area - сфера занятости для вакансии
+    row - список специализаций в вакансии
+    sp - датафрейм с сопоставлением сфер и специализаций
+    Возвращает:
+    одну специализацию
+    """
+    for specialization in row:
+        try:
+            if pd.notna(sp[prof_area][specialization]):
+                return specialization
+        except:
+            pass
+    return 'Другое'
+
 def prof_area_matrix(len_profareas: pd.DataFrame, row: set):
     """
     Создаём метод, который заполняет матрицу сопоставлений сфер в одной вакансии
@@ -93,7 +111,7 @@ def statistics(df: pd.DataFrame, col: str, currency: bool):
         s = x.style.format(formatter='{:,.0f}')
         display(s)
 
-def plot_salary(df: pd.DataFrame, col: str, currency: bool, diff: bool):
+def plot_salary(df: pd.DataFrame, col: str, currency: bool, diff: bool, figsize: (float, float)):
   """
   Создаём метод, который рисует распределение зарплат по какому-то параметру
   Аргументы:
@@ -101,10 +119,11 @@ def plot_salary(df: pd.DataFrame, col: str, currency: bool, diff: bool):
   col - по какому параметру (столбцу) строим распределение
   currency - бинарная переменная, нужно ли условие на российскую валюту
   diff - бинарная переменная, нужно рисовать salary_diff или salary_from, dalary_to, salary_avg
+  figsize - размер графика
   """
   els = df[col].dropna().unique()
   nrows = int(len(els)/3)+1 if len(els) % 3 != 0 else int(len(els)/3)
-  fig, ax = pyplot.subplots(nrows=nrows, ncols=3, figsize=(25,40))
+  fig, ax = pyplot.subplots(nrows=nrows, ncols=3, figsize=figsize)
   k = 0
   for i in range(nrows):
     for j in range(3):
@@ -131,6 +150,7 @@ def plot_salary(df: pd.DataFrame, col: str, currency: bool, diff: bool):
         k += 1
   fig.tight_layout(pad=2)
   pyplot.show()
+
 def tax(df: pd.DataFrame, col: str):
   """
   Создвём метод, который нормирует на НДФЛ для каждой страны
