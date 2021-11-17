@@ -1,0 +1,1 @@
+1. https://drive.google.com/file/d/1YsX2nb2IxiKICa7S1b5LLMNC0puVwwry/view?usp=sharing - Обработанные hh-данные с помощью jd_parser.py --detect_translate_language=0
