@@ -138,4 +138,4 @@ df['len_description_requirements'] = df['description_requirements'].apply(len)
 df['len_description_conditions'] = df['description_conditions'].apply(len)
 
 # Сохраняем распарсенный датафрейм
-df.to_csv('vacancies_processed.csv', index=False)
+df.to_csv(f'{output_path}/vacancies_processed.csv', index=False)
