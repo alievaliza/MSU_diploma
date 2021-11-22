@@ -5,6 +5,8 @@ from typing import List, Dict
 from googletrans import Translator
 import langid
 import re
+import requests
+import json
 
 parser = argparse.ArgumentParser(description='Parsing job descriptions')
 parser.add_argument(
@@ -25,9 +27,71 @@ detect_translate_language = parser.parse_args().detect_translate_language
 # Загружаем таблицу с гугл-диска
 url = '15_FfenvHFoJVcPu6gGx9osLn71uDJ-Et'
 output = f"{output_path}/vacancies_interim.csv"
-gdown.download('https://drive.google.com/uc?export=download&id=' + url, output, quiet=False)
+# gdown.download('https://drive.google.com/uc?export=download&id=' + url, output, quiet=False)
 
 df = pd.read_csv(output)
+
+# Удаляем идентичные столбцы
+cols = ['billing_type_id', 'experience_id', 'employment_id', 'alternate_url', 'schedule_id', 'area_url', 'working_time_modes_id', 'type_id']
+for col in cols:
+  del df[col]
+
+# Получаем все города и их parent_id
+req = requests.get('https://api.hh.ru/areas')  # Посылаем запрос к API
+data = req.content.decode()  # Декодируем его ответ, чтобы Кириллица отображалась корректно
+req.close()
+jsonObj = json.loads(data)
+cities, countries_name, areas_name = [], [], []
+for i in range(len(jsonObj)):
+    for area in jsonObj[i]['areas']:
+      if area['areas'] == []:
+        cities.append(area)
+        countries_name.append(jsonObj[i]['name'])
+        areas_name.append(area['name'])
+      else:
+        for city in area['areas']:
+          cities.append(city)
+          countries_name.append(jsonObj[i]['name'])
+          areas_name.append(area['name'])
+df_cities = pd.DataFrame(cities)
+df_cities['country_name'] = countries_name
+df_cities['areas_name'] = areas_name
+
+# Переименовываем столбец
+df_cities['area_id'] = df_cities['id']
+df_cities = df_cities.drop('id', axis=1)
+
+# Конвертируем в формат int, чтобы сопоставить
+df_cities['area_id'] = df_cities['area_id'].astype(str).astype(int)
+
+# Присваиваем каждой строке имя региона и страны
+df['areas_name'] = df['area_id'].map(df_cities.set_index('area_id')['areas_name'])
+df['country_name'] = df['area_id'].map(df_cities.set_index('area_id')['country_name'])
+
+# Создаём столбец prof_area
+df['specializations_profarea_name'] = df['specializations_profarea_name'].apply(lambda x: eval(x))
+df['prof_area'] = df['specializations_profarea_name'].apply(lambda x: x[0])
+
+# Добавляем фичи с длиной специализаций и сфер
+df['len_specializations'] = df['specializations_name'].apply(lambda x: len(eval(x)))
+df['len_profarea'] = df['specializations_profarea_name'].apply(lambda x: len(set(x)))
+
+# Удаляем столбцы, в которых больше 85% NaN:
+# 'department_id', 'department_name', 'driver_license_types_id', 'test_required', 'working_days_id', 'working_days_name', 'working_time_intervals_id', 'working_time_intervals_name',
+# 'branded_description', 'response_url', 'code', 'immediate_redirect_url', 'insider_interview_id', 'insider_interview_url', 'vacancy_constructor_template_id',
+# 'vacancy_constructor_template_name', 'vacancy_constructor_template_top_picture_height', 'vacancy_constructor_template_top_picture_width',
+# 'vacancy_constructor_template_top_picture_path', 'vacancy_constructor_template_top_picture_blurred_path', 'vacancy_constructor_template_bottom_picture_height',
+# 'vacancy_constructor_template_bottom_picture_width', 'vacancy_constructor_template_bottom_picture_path', 'vacancy_constructor_template_bottom_picture_blurred_path'
+for col in df.columns:
+  if df[col].isna().sum()/len(df) > 0.85:
+    del df[col]
+
+# Перекодируем столбец с опытом работы в числа
+df['experience_name'] = df['experience_name'].replace('Нет опыта', 0)
+df['experience_name'] = df['experience_name'].replace('От 1 года до 3 лет', 2)
+df['experience_name'] = df['experience_name'].replace('От 3 до 6 лет', 4.5)
+df['experience_name'] = df['experience_name'].replace('Более 6 лет', 6)
+
 
 if detect_translate_language:
     # определяем язык описаний
