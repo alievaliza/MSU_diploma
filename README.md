@@ -1,7 +1,7 @@
 Diploma
 ==============================
 
-predicting salary by job description
+Job Salary Prediction Based on Description
 
 Project Organization
 ------------
