@@ -16,18 +16,18 @@ parser.add_argument(
     help='input output_path (default: ".")'
 )
 parser.add_argument(
-    '--detect_translate_language',
+    '--translate_description',
     type= bool,
     default=False,
-    help='input detect_translate_language (default: False)'
+    help='input translate_description (default: False)'
 )
 output_path = parser.parse_args().output_path
-detect_translate_language = parser.parse_args().detect_translate_language
+translate_description = parser.parse_args().translate_description
 
 # Загружаем таблицу с гугл-диска
 url = '15_FfenvHFoJVcPu6gGx9osLn71uDJ-Et'
 output = f"{output_path}/vacancies_interim.csv"
-# gdown.download('https://drive.google.com/uc?export=download&id=' + url, output, quiet=False)
+gdown.download('https://drive.google.com/uc?export=download&id=' + url, output, quiet=False)
 
 df = pd.read_csv(output)
 
@@ -72,6 +72,9 @@ df['country_name'] = df['area_id'].map(df_cities.set_index('area_id')['country_n
 df['specializations_profarea_name'] = df['specializations_profarea_name'].apply(lambda x: eval(x))
 df['prof_area'] = df['specializations_profarea_name'].apply(lambda x: x[0])
 
+# Создаём столбец spezialization
+df['specialization'] = df['specializations_name'].apply(lambda x: eval(x)[0])
+
 # Добавляем фичи с длиной специализаций и сфер
 df['len_specializations'] = df['specializations_name'].apply(lambda x: len(eval(x)))
 df['len_profarea'] = df['specializations_profarea_name'].apply(lambda x: len(set(x)))
@@ -92,25 +95,27 @@ df['experience_name'] = df['experience_name'].replace('От 1 года до 3 л
 df['experience_name'] = df['experience_name'].replace('От 3 до 6 лет', 4.5)
 df['experience_name'] = df['experience_name'].replace('Более 6 лет', 6)
 
+# определяем язык описаний
+lang_list = []
+def lang_variety(x: str):
+    """
+    Создаём метод, который определяет язык и создаёт список с языками
+    Аргумент:
+    x - текст, у которого нужно определить язык
+    """
+    language = langid.classify(x)[0]
+    lang_list.append(language)
 
-if detect_translate_language:
-    # определяем язык описаний
-    lang_list = []
-    def lang_variety(x: str):
-        """
-        Создаём метод, который определяет язык и создаёт список с языками
-        Аргумент:
-        x - текст, у которого нужно определить язык
-        """
-        language = langid.classify(x)[0]
-        lang_list.append(language)
+df['description'].apply(lambda x: lang_variety(x))
+df['language'] = pd.DataFrame(lang_list)
 
-    df['description'].apply(lambda x: lang_variety(x))
-    df['language'] = pd.DataFrame(lang_list)
-
+if translate_description:
     # переводим не русскоязычные описания
     translator = Translator()
     df['description'][df['language'] != 'ru'] = df['description'][df['language'] != 'ru'].apply(lambda x: translator.translate(x, dest='ru').text)
+
+# Сохраняем столбец с непреобразованным описанием вакансий
+df['raw_description'] = df['description']
 
 def jd(x: str, regular_try: str, regular_except: str, regular_except_try: str, result: list, result_: list):
   """
