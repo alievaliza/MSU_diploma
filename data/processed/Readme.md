@@ -1,1 +1,2 @@
-1.  - Обработанные hh-данные с помощью jd_parser.py --translate_description=False
+1. https://drive.google.com/file/d/1YsX2nb2IxiKICa7S1b5LLMNC0puVwwry/view?usp=sharing - Обработанные hh-данные с помощью jd_parser.py --translate_description=False
+2. https://drive.google.com/file/d/1A-59GMNuJWbrbCc17zvBPkOycSdCBdCA/view?usp=sharing - Лемматизированные hh-данные (код в prof_area_specialization_classification.ipynb)
