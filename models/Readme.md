@@ -1,4 +1,4 @@
-1. raw_desc_tfidf_RF_specialization.pkl - RandomForestClassifier, классифицирующий specialization features - tfidf над столбцом raw_description (max_features=3500)
-2. raw_desc_tfidf_RF_prof_area.pkl - RandomForestClassifier, классифицирующий prof_area. features - tfidf над столбцом raw_description (max_features=3500)
-3. lem_desc_tfidf_RF_prof_area.pkl - RandomForestClassifier, классифицирующий prof_area. features - tfidf над столбцом lem_raw_desc (max_features=3500)
-4. lem_desc_tfidf_RF_specialization.pkl - RandomForestClassifier, классифицирующий specialization. features - tfidf над столбцом lem_raw_desc (max_features=3500)
+1. raw_desc_tfidf_RF_specialization - RandomForestClassifier, классифицирующий specialization features - tfidf над столбцом raw_description (max_features=3500)
+2. raw_desc_tfidf_RF_prof_area - RandomForestClassifier, классифицирующий prof_area. features - tfidf над столбцом raw_description (max_features=3500)
+3. lem_desc_tfidf_RF_prof_area - RandomForestClassifier, классифицирующий prof_area. features - tfidf над столбцом lem_raw_desc (max_features=3500)
+4. lem_desc_tfidf_RF_specialization - RandomForestClassifier, классифицирующий specialization. features - tfidf над столбцом lem_raw_desc (max_features=3500)
