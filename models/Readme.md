@@ -2,3 +2,8 @@
 2. raw_desc_tfidf_RF_prof_area - RandomForestClassifier, классифицирующий prof_area. features - tfidf над столбцом raw_description (max_features=3500)
 3. lem_desc_tfidf_RF_prof_area - RandomForestClassifier, классифицирующий prof_area. features - tfidf над столбцом lem_raw_desc (max_features=3500)
 4. lem_desc_tfidf_RF_specialization - RandomForestClassifier, классифицирующий specialization. features - tfidf над столбцом lem_raw_desc (max_features=3500)
+5. lem_desc_tfidf_LR_prof_area - LogisticRegression, классифицирующий prof_area. features - tfidf над столбцом lem_raw_desc (max_features=14000)
+6. raw_desc_tfidf_LR_prof_area_with_len - LogisticRegression, классифицирующий prof_area. features - tfidf над столбцом raw_description (max_features=4000) и столбцы 'len_description_responsibilities', 'len_description_requirements', 'len_description_conditions'
+7. raw_desc_tfidf_Ridge - Ridge, прогнозирующий salary_from. features - tfidf над столбцом raw_description (max_features=14000). Выборка - датасет с русскоязычными hh-вакансиями
+8. raw_desc_tfidf_Ridge_merged_df - Ridge, прогнозирующий salary_from. features - tfidf над столбцом raw_description (max_features=14000). Выборка - 2 датасета с hh-вакансиями
+9. raw_desc_tfidf_Ridge_only_Russia - Ridge, прогнозирующий salary_from. features - tfidf над столбцом raw_description (max_features=14000). Выборка - датасет с hh-вакансиями из России
