@@ -39,9 +39,11 @@ def report(df: pd.DataFrame, y_test: pd.DataFrame, y_pred: np.array, col: str) -
   regression_report - репорт с MAE, средним и стандартным отклонением salary_from по сферам и в совокупности
   salary - репорт с MAE, средним и стандартным отклонением salary_from по сферам и в совокупности, где хранятся индексы (сферы)
   """
-  salary_groupped_prof_area = df[[col, 'salary_from']].groupby([col]).mean()
-  salary_groupped_prof_area_std = df[[col, 'salary_from']].groupby([col]).std()
-  salary_pred = salary_groupped_prof_area.loc[y_pred]
+  y_train_index = set(df.index).difference(set(y_test.index))
+  salary_groupped_prof_area = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).mean()
+  salary_groupped_prof_area_std = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).std()
+  salary_groupped_prof_area_pred = df.loc[y_train_index, [col, 'salary_from']].groupby([col]).mean()
+  salary_pred = salary_groupped_prof_area_pred.loc[y_pred]
   salary_test = df.loc[y_test.index, 'salary_from']
   salary = pd.DataFrame()
   salary['y_pred'] = y_pred
@@ -85,7 +87,7 @@ def report_regression(df: pd.DataFrame, y_test: pd.DataFrame, y_pred: np.array, 
   regression_report - репорт с MAE, средним и стандартным отклонением salary_from по сферам и в совокупности
   salary - репорт с MAE, средним и стандартным отклонением salary_from по сферам и в совокупности, где хранятся индексы (сферы)
   """
-  salary_groupped_prof_area = df[[col, 'salary_from']].groupby([col]).mean()
+  salary_groupped_prof_area = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).mean()
   salary_groupped_prof_area_std = df[[col, 'salary_from']].groupby([col]).std()
   salary_test = df.loc[y_test.index, 'salary_from']
   salary = pd.DataFrame()
@@ -97,7 +99,7 @@ def report_regression(df: pd.DataFrame, y_test: pd.DataFrame, y_pred: np.array, 
     regression_report.append([round(mean_absolute_error(salary['pred'][salary['true'] == area], salary['test'][salary['true'] == area]), 1),
     round(float(salary_groupped_prof_area.loc[area]), 1), round(float(salary_groupped_prof_area_std.loc[area]), 1)])
   regression_report.append([round(mean_absolute_error(salary['pred'], salary['test']), 1),
-    round(float(df['salary_from'].mean()), 1), round(float(df['salary_from'].std()), 1)])
+    round(float(df.loc[y_test.index, 'salary_from'].mean()), 1), round(float(df['salary_from'].std()), 1)])
   return regression_report, salary
 
 def specialization(df: pd.DataFrame, y_pred: str) -> Union[pd.DataFrame, pd.DataFrame]:
@@ -155,8 +157,8 @@ def regression(df: pd.DataFrame, y_pred: str) -> pd.DataFrame:
   y_pred = joblib.load(y_pred)
   y_train, y_test = train_test_split(df['salary_from'], test_size=0.2, random_state=42)
   col = 'prof_area'
-  salary_groupped_prof_area = df[[col, 'salary_from']].groupby([col]).mean()
-  salary_groupped_prof_area_std = df[[col, 'salary_from']].groupby([col]).std()
+  salary_groupped_prof_area = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).mean()
+  salary_groupped_prof_area_std = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).std()
   salary_test = df.loc[y_test.index, 'salary_from']
   salary = pd.DataFrame()
   salary['test'] =  list(salary_test)
@@ -170,4 +172,26 @@ def regression(df: pd.DataFrame, y_pred: str) -> pd.DataFrame:
   regression_report.columns = ['MAE', 'salary_from_mean', 'salary_from_std']
   regression_report.index = salary['true'].unique()
   return regression_report
+
+class mean_vectorizer(object):
+
+  def __init__(self, word2vec: Dict[str, float]):
+    self.word2vec = word2vec
+    self.dim = len(next(iter(word2vec.values())))
+
+  def fit(self):
+    return self
+
+  def transform_one_sentence(self, sentence: str, idf_w: Dict[str, float]) -> np.ndarray:
+    res = np.zeros(self.dim)
+    denominator = 0
+    for word in sentence.split():
+      vect = self.word2vec[word] if word in self.word2vec else np.zeros(self.dim)
+      curr_idf_weight = idf_w.get(word, 1)
+      res += vect * curr_idf_weight
+      denominator += curr_idf_weight
+    return res / denominator
+
+  def transform(self, X: pd.Series, idf_w: Dict[str, float]):
+    return np.array([self.transform_one_sentence(text, idf_w) for text in X])
 
