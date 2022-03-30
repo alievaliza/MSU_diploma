@@ -27,7 +27,7 @@ def salary_process(df: pd.DataFrame):
   df.loc[(df['salary_gross'] == False) & (df['country_name'] == 'Украина'), 'salary_from'] = df['salary_from'] / 0.82
   df.loc[(df['salary_gross'] == False) & (df['country_name'] == 'Грузия'), 'salary_from'] = df['salary_from'] / 0.8
 
-def report(df: pd.DataFrame, y_test: pd.DataFrame, y_pred: np.array, col: str) -> Union[List, pd.DataFrame]:
+def report(df: pd.DataFrame, y_test: list, y_pred: np.array, col: str) -> Union[List, pd.DataFrame]:
   """
   Создаём метод, который создаёт регрессионный репорт для моделей, классифицирующих сферу/пециализацию
   Аргументы:
@@ -39,11 +39,11 @@ def report(df: pd.DataFrame, y_test: pd.DataFrame, y_pred: np.array, col: str) -
   regression_report - репорт с MAE, средним и стандартным отклонением salary_from по сферам и в совокупности
   salary - репорт с MAE, средним и стандартным отклонением salary_from по сферам и в совокупности, где хранятся индексы (сферы)
   """
-  y_train_index = set(df.index).difference(set(y_test.index))
+  y_valid, y_test, y_pred_valid, y_pred = train_test_split(y_test, y_pred, test_size=0.5, random_state=42)
+  salary_valid = df.loc[y_valid.index, [col, 'salary_from']].groupby([col]).mean()
   salary_groupped_prof_area = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).mean()
   salary_groupped_prof_area_std = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).std()
-  salary_groupped_prof_area_pred = df.loc[y_train_index, [col, 'salary_from']].groupby([col]).mean()
-  salary_pred = salary_groupped_prof_area_pred.loc[y_pred]
+  salary_pred = salary_valid.loc[y_pred]
   salary_test = df.loc[y_test.index, 'salary_from']
   salary = pd.DataFrame()
   salary['y_pred'] = y_pred
@@ -56,6 +56,7 @@ def report(df: pd.DataFrame, y_test: pd.DataFrame, y_pred: np.array, col: str) -
     regression_report.append([round(mean_absolute_error(salary['pred'][salary['true'] == area], salary['test'][salary['true'] == area]), 1),
     round(float(salary_groupped_prof_area.loc[area]), 1), round(float(salary_groupped_prof_area_std.loc[area]), 1)])
   return regression_report, salary
+
 
 def decrease_specializations(df: pd.DataFrame, specializations: Dict, x: str) -> str:
   """
