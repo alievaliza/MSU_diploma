@@ -250,14 +250,14 @@ def cv_and_predict(
 
       oof_df.loc[valid_index, "prediction_oof"] = prediction_kf
 
-      cur_metric = mean_absolute_percentage_error(y_valid, prediction_kf)
+      cur_metric = mean_absolute_error(y_valid, prediction_kf)
       metrics.append(cur_metric)
       if verbose:
         print(f"metric_{i}: {cur_metric}")
         print()
         print("_" * 100)
         print()
-    metric_OOF = mean_absolute_percentage_error(train_y, oof_df["prediction_oof"])
+    metric_OOF = mean_absolute_error(train_y, oof_df["prediction_oof"])
 
     if verbose:
       print(f"metric_OOF: {metric_OOF}")
