@@ -1,7 +1,7 @@
 Diploma
 ==============================
 
-Job Salary Prediction Based on Description
+Job Salary Forecasting Based on Description Using Machine Learning Approaches
 
 Project Organization
 ------------

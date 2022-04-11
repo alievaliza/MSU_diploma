@@ -149,7 +149,7 @@ def prof_area(df: pd.DataFrame, y_pred: str) -> Union[pd.DataFrame, pd.DataFrame
   regression_report.index = salary['true'].unique()
   return report_class, regression_report
 
-def regression(df: pd.DataFrame, y_pred: str) -> pd.DataFrame:
+def regression(df: pd.DataFrame, y_pred: str, meta_split=False) -> pd.DataFrame:
   """
   Создаём метод, который создаёт отчёты (классификационный и регрессионный) для моделей, прогнозирующих з/п
   Аргументы:
@@ -161,6 +161,9 @@ def regression(df: pd.DataFrame, y_pred: str) -> pd.DataFrame:
   df = df[['raw_description', 'salary_from', 'prof_area']].dropna()
   y_pred = joblib.load(y_pred)
   y_train, y_test = train_test_split(df['salary_from'], test_size=0.2, random_state=42)
+  if meta_split:
+    y_train, y_test = train_test_split(df['salary_from'], test_size=0.5, random_state=42)
+    y_train, y_test = train_test_split(y_test, test_size=0.4, random_state=42)
   col = 'prof_area'
   salary_groupped_prof_area = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).mean()
   salary_groupped_prof_area_std = df.loc[y_test.index, [col, 'salary_from']].groupby([col]).std()
