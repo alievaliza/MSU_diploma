@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import metrics
 import sys, os
 from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
 
 sys.path.append(os.path.abspath('../'))
 from src.data import eda_utils
@@ -209,6 +210,7 @@ def cv_and_predict(
           df_test,
           train_y,
           model_kf,
+          do_scaling=True,
           n_splits=12,
           random_state=42,
           verbose=True,
@@ -220,23 +222,29 @@ def cv_and_predict(
     :param df_test: Тест-датафрейм
     :param train_y: Ответы на трейн
     :param model_kf: Модель, которую мы хотим учить
+    :param do_scaling: Делаем ли скейлинг признаков
     :param n_splits: Количество сплитов для KFold
     :param random_state: random_state для KFold
     :param verbose: Делаем ли print'ы
 
     :return: pred_test: Предсказания на тест; oof_df: OOF предсказания
     """
+
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+
     # В датафрейме oof_df будут храниться настоящий таргет трейна и OOF предсказания на трейн.
     # Инициализируем prediction_oof нулями и будем заполнять предсказаниями в процессе валидации
     oof_df = pd.DataFrame()
     oof_df["target"] = train_y
     oof_df["prediction_oof"] = np.zeros(oof_df.shape[0])
+
     # Список с метриками по фолдам
     metrics = []
+
     # Предсказания на тест. Инициализируем нулями и будем заполнять предсказаниями в процессе валидации.
     # Наши предсказания будут усреднением n_splits моделей
     pred_test = np.zeros(df_test.shape[0])
+
     # Кросс-валидация
     for i, (train_index, valid_index) in enumerate(kf.split(df_train, train_y)):
       if verbose:
@@ -244,12 +252,31 @@ def cv_and_predict(
 
       X_train = df_train[train_index]
       y_train = train_y[train_index]
+
+      if do_scaling:
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_train = pd.DataFrame(X_train)
+
       X_valid = df_train[valid_index]
-      y_valid = train_y[valid_index]
+      y_valid = (train_y[valid_index])
+
+      if do_scaling:
+        X_valid = scaler.transform(X_valid)
+        X_valid = pd.DataFrame(X_valid)
+
       model_kf.fit(X_train, y_train)
-      prediction = model_kf.predict(df_test)
+
+      if do_scaling:
+        df_test_scaled = scaler.transform(df_test)
+        df_test_scaled = pd.DataFrame(df_test_scaled)
+        prediction = model_kf.predict(df_test_scaled)
+      else:
+        prediction = model_kf.predict(df_test)
+
       pred_test += prediction / n_splits
-      prediction_kf = model_kf.predict(X_valid)
+
+      prediction_kf = (model_kf.predict(X_valid))
 
       oof_df.loc[valid_index, "prediction_oof"] = prediction_kf
 
@@ -260,6 +287,7 @@ def cv_and_predict(
         print()
         print("_" * 100)
         print()
+
     metric_OOF = mean_absolute_error(train_y, oof_df["prediction_oof"])
 
     if verbose:
