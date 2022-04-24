@@ -129,6 +129,7 @@ def specialization(df: pd.DataFrame, y_pred: str) -> Union[pd.DataFrame, pd.Data
   regression_report = pd.DataFrame(regression_report)
   regression_report.columns = ['MAE', 'MAPE','salary_from_mean', 'salary_from_std']
   regression_report.index = salary['true'].unique()
+  report_class['salary_from_mean'] = regression_report['salary_from_mean']
   return report_class, regression_report
 
 def prof_area(df: pd.DataFrame, y_pred: str) -> Union[pd.DataFrame, pd.DataFrame]:
@@ -148,6 +149,7 @@ def prof_area(df: pd.DataFrame, y_pred: str) -> Union[pd.DataFrame, pd.DataFrame
   regression_report = pd.DataFrame(regression_report)
   regression_report.columns = ['MAE', 'MAPE','salary_from_mean', 'salary_from_std']
   regression_report.index = salary['true'].unique()
+  report_class['salary_from_mean'] = regression_report['salary_from_mean']
   return report_class, regression_report
 
 def regression(df: pd.DataFrame, y_pred: str, meta_split=False) -> pd.DataFrame:
@@ -299,4 +301,3 @@ def cv_and_predict(
       print()
 
     return pred_test, oof_df, metric_OOF
-
